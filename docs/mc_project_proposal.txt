@@ -1,0 +1,215 @@
+                       Project Proposal:
+     Adaptive Sample Allocation in Multilevel Monte Carlo for
+                         Option Pricing
+                            Yongxu Wang, Yinan Shi, Alex Zhu
+
+                                         May 4, 2026
+
+
+
+1    Project Scope
+Our project studies how Multilevel Monte Carlo (MLMC) can be used to improve the compu-
+tational efficiency of option pricing. The main motivation is that standard Monte Carlo (MC)
+simulation is flexible and easy to apply, but it can become computationally expensive when high
+accuracy is required, especially for path-dependent options. We aim to begin from the classical
+Black–Scholes setting, reproduce baseline results using standard Monte Carlo, and then move
+to MLMC for both European and path-dependent options.
+    The project will proceed in five stages. First, we will study the Black–Scholes model and
+standard Monte Carlo pricing, and reproduce benchmark results for European options. Second,
+we will learn and implement the MLMC algorithm for European option pricing. Third, we
+will extend the MLMC framework to a path-dependent option, most likely an arithmetic Asian
+option. Fourth, we will propose a modification to the original MLMC sample allocation rule by
+introducing an adaptive allocation strategy based on iterative variance estimation across levels.
+Finally, we will compare the modified MLMC algorithm with the original MLMC in terms of
+pricing accuracy, variance, root mean squared error, and computational cost.
+    Our project is designed to match the three required elements of the course project. The
+learning component is the study of Black–Scholes pricing, standard Monte Carlo simulation, and
+the MLMC algorithm. The analysis component is the empirical comparison of standard MC,
+original MLMC, and modified MLMC across different option types and parameter settings. The
+research component is the modification of the MLMC sample allocation rule and the evaluation
+of whether this modification improves efficiency in practice.
+
+
+2    Background and Motivation
+Under the Black–Scholes framework, the underlying asset price follows geometric Brownian
+motion. For a European call option, the arbitrage-free price has a closed-form expression,
+which makes it an ideal benchmark for validating simulation-based pricing methods. In standard
+Monte Carlo pricing, the option value is estimated by simulating many asset paths and averaging
+discounted payoffs. However, for a target root mean squared error of order ε, standard Monte
+Carlo with Euler discretization can have computational cost of order O(ε−3 ).
+    MLMC reduces this cost by combining estimators across multiple discretization levels. In-
+stead of simulating only on the finest grid, MLMC writes the finest-level expectation as a
+
+
+                                               1
+telescoping sum:
+                                                       L
+                                                       X
+                                 E[PbL ] = E[Pb0 ] +         E[Pbℓ − Pbℓ−1 ].
+                                                       ℓ=1
+
+The idea is that coarse levels are cheap and capture most of the expectation, while fine levels
+estimate small corrections with relatively low variance if the fine and coarse paths are properly
+coupled. This makes MLMC especially attractive for option pricing problems in which standard
+Monte Carlo becomes too costly.
+
+
+3     Methods
+3.1     Stage 1: Black–Scholes and Standard Monte Carlo
+We will first implement the Black–Scholes formula for European call options under geometric
+Brownian motion and compare it against standard Monte Carlo simulation. This will provide:
+
+    • a benchmark for validating simulation code,
+
+    • a reference point for pricing accuracy,
+
+    • and a baseline for later computational comparisons.
+
+     The asset price dynamics under the risk-neutral measure are
+
+                                      dSt = rSt dt + σSt dWt .
+
+For a European call option with strike K and maturity T , the price is
+
+                                     V0 = e−rT E (ST − K)+ .
+                                                         
+
+
+3.2     Stage 2: MLMC for European Options
+Next, we will implement MLMC for European option pricing. We will construct coupled fine
+and coarse paths using the same Brownian path, estimate correction terms Pbℓ − Pbℓ−1 , and
+allocate samples across levels according to the standard MLMC sample allocation rule. We will
+compare standard MC and MLMC in terms of:
+
+    • estimated option values,
+
+    • variance,
+
+    • root mean squared error (RMSE),
+
+    • and computational cost.
+
+3.3     Stage 3: Extension to a Path-Dependent Option
+We will then extend the MLMC framework to a path-dependent option, most likely an arithmetic
+Asian option. This is a natural next step because MLMC becomes more meaningful when no
+simple closed-form benchmark exists. For the Asian option, the payoff depends on the average
+price along the path rather than only the terminal price, making the simulation problem more
+challenging and more representative of realistic applications.
+
+
+                                                   2
+3.4   Stage 4: Modification of the Sample Allocation Rule
+The main research contribution of our project will be a modification of the MLMC sample
+allocation strategy. In the original algorithm, the number of samples on each level depends
+on estimated level variances and costs. Our proposed modification is to make this allocation
+more adaptive by updating the sample sizes iteratively as improved variance estimates become
+available. Intuitively, this may reduce unnecessary sampling on levels whose correction variance
+is already stable or negligible.
+    At a high level, our modified approach will:
+
+ 1. start with a pilot sample on each level,
+
+ 2. estimate level variances,
+
+ 3. allocate additional samples according to current variance estimates,
+
+ 4. update the variance estimates again,
+
+ 5. and repeat until the target accuracy is reached.
+
+3.5   Stage 5: Comparison and Evaluation
+Finally, we will compare:
+
+  • standard Monte Carlo,
+
+  • original MLMC,
+
+  • and modified MLMC.
+
+   The main evaluation metrics will include:
+
+  • pricing error,
+
+  • standard error,
+
+  • RMSE,
+
+  • runtime,
+
+  • total computational cost,
+
+  • and level-by-level sample allocation.
+
+   Our key research question is:
+
+      Can an adaptive sample allocation strategy improve the practical efficiency of MLMC
+      for option pricing compared with the original allocation rule?
+
+
+
+
+                                               3
+4     Expected Outcomes
+We expect the following outcomes:
+
+    • Standard MLMC should outperform standard Monte Carlo in computational efficiency for
+      a fixed target accuracy.
+
+    • The performance gain should be more visible for path-dependent options than for simple
+      European options.
+
+    • Our adaptive allocation modification may reduce computational cost further by distributing
+      sampling effort more effectively across levels.
+
+   We also recognize that the modified allocation may not always outperform the original
+method. If so, that would still be a meaningful result, since part of the project is to test
+whether a plausible algorithmic change actually improves performance.
+
+
+5     Contribution Matrix
+    Member               Responsibility
+    Yongxu Wang          Black–Scholes formula implementation, standard Monte Carlo bench-
+                         mark, write-up of background and motivation
+    Yinan Shi            MLMC implementation for European option, coupled path construc-
+                         tion, initial experiments
+    Alex Zhu             Path-dependent option implementation, adaptive sample allocation
+                         modification, comparison figures and tables
+    All Members          Discussion of results, slide preparation, final report revision, and pre-
+                         sentation rehearsal
+
+If our group has a different number of members, we will adjust this matrix accordingly while
+keeping responsibilities concrete and clearly separated.
+
+
+6     Logistics
+We propose the following meeting schedule:
+
+    • Meeting 1 4/23: finalize scope, references, and task assignment
+
+    • Meeting 2 4/27: review Black–Scholes and standard MC implementation
+
+    • Meeting 3 4/30: integrate MLMC implementation and test European option results
+
+    • Meeting 4 5/5: implement and evaluate path-dependent option and modified allocation
+
+    • Meeting 5 5/8: finalize report, figures, and presentation slides
+
+    • Meeting 6 5/10: presentation rehearsal
+
+   We plan to use GitHub/Colab for version control, Overleaf for collaborative writing, and
+shared online documents for notes and meeting records.
+
+
+                                                 4
+7   Initial References
+1. Michael B. Giles, Multilevel Monte Carlo path simulation, Oxford-Man Institute Working
+   Paper, 2007.
+
+2. Desmond J. Higham, An introduction to multilevel Monte Carlo for option valuation, In-
+   ternational Journal of Computer Mathematics, 92(12):2347–2360, 2015.
+
+
+
+
+                                           5
+

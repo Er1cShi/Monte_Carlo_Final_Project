@@ -1,0 +1,931 @@
+OPERATIONS RESEARCH                                                                                                                       informs      ®
+Vol. 56, No. 3, May–June 2008, pp. 607–617
+issn 0030-364X  eissn 1526-5463  08  5603  0607                                                                            doi 10.1287/opre.1070.0496
+                                                                                                                                        © 2008 INFORMS
+
+
+
+
+                         Multilevel Monte Carlo Path Simulation
+                                                                 Michael B. Giles
+                                 Oxford University Mathematical Institute, and Oxford—Man Institute of Quantitative Finance,
+                                               Oxford OX1 3LB, United Kingdom, mike.giles@maths.ox.ac.uk
+
+
+        We show that multigrid ideas can be used to reduce the computational complexity of estimating an expected value arising
+        from a stochastic differential equation using Monte Carlo path simulations. In the simplest case of a Lipschitz payoff and
+        a Euler discretisation, the computational cost to achieve an accuracy of O is reduced from O−3  to O−2 log 2 .
+        The analysis is supported by numerical results showing signiﬁcant computational savings.
+        Subject classiﬁcations: analysis of algorithms: computational complexity; ﬁnance; simulation: efﬁciency.
+        Area of review: Financial Engineering.
+        History: Received May 2006; revisions received December 2006, March 2007; accepted April 2007.
+
+
+
+1. Introduction                                                                    where c1 , c2 are positive constants. The ﬁrst term corre-
+In Monte Carlo path simulations that are used extensively                          sponds to the variance in Y due to the Monte Carlo sam-
+in computational ﬁnance, one is interested in the expected                         pling, and the second term is the square of the Oh bias
+                                                                                   introduced by the Euler discretisation.
+value of a quantity that is a functional of the solution to a
+                                                                                      To make the MSE O2 , so that the root-mean-square
+stochastic differential equation (SDE). To be speciﬁc, sup-
+                                                                                   error (RSME) is O, requires that N = O−2  and h =
+pose that we have a multidimensional SDE with general
+                                                                                   O, and hence the computational complexity (cost) is
+drift and volatility terms,
+                                                                                   O−3  (Dufﬁe and Glynn 1995). The main theorem in
+                                                                                   this paper proves that the computational complexity for
+dSt = aS t dt + bS t dW t             0<t<T                (1)
+                                                                                   this simple case can be reduced to O−2 log 2  through
+                                                                                   the use of a multilevel method that reduces the variance,
+and given initial data S0 we want to compute the expected
+                                                                                   leaving unchanged the bias due to the Euler discretisa-
+value of f ST , where f S is a scalar function with
+                                                                                   tion. The multilevel method is very easy to implement and
+a uniform Lipschitz bound; i.e., there exists a constant c                         can be combined, in principle, with other variance reduc-
+such that                                                                          tion methods such as stratiﬁed sampling (Glasserman 2004)
+                                                                                   and quasi-Monte Carlo methods (Kuo and Sloan 2005,
+f U  − f V  ⩽ cU − V  ∀ U  V                                 (2)         L’Ecuyer 2004, Niederreiter 1992) to obtain even greater
+                                                                                   savings.
+   A simple Euler discretisation of this SDE with time-                               The method extends the recent work of Kebaier (2005),
+step h is                                                                          who proved that the computational cost of the simple prob-
+                                                                                   lem described above can be reduced to O−25  through
+Sn+1 = Sn + aSn  tn  h + bSn  tn  Wn                                   the appropriate combination of results obtained using two
+                                                                                   levels of timestep, h and Oh1/2 . This is closely related
+and the simplest estimate for Ef ST  is the mean                               to a more generally applicable approach of quasi-control
+of the payoff values f ST /h , from N independent path                          variates analysed by Emsermann and Simon (2002).
+simulations                                                                           Our technique generalises Kebaier’s (2005) approach to
+                                                                                   multiple levels, using a geometric sequence of different
+            
+            N
+                                                                                   timesteps hl = M −l T , l = 0 1     L, for integer M ⩾ 2,
+Y = N −1         f ST /h 
+                       i
+
+            i=1                                                                    with the smallest timestep hL corresponding to the origi-
+                                                                                   nal h, which determines the size of the Euler discretisation
+It is well established that, provided aS t and bS t sat-                     bias. This idea of using a geometric sequence of timesteps
+isfy certain conditions (Bally and Talay 1995, Kloeden and                         comes from the multigrid method for the iterative solution
+Platen 1992, Talay and Tubaro 1990), the expected mean-                            of linear systems of equations arising from the discretisa-
+square error (MSE) in the estimate Y is asymptotically of                         tion of elliptic partial differential equations (Briggs et al.
+the form                                                                           2000, Wesseling 1992). The multigrid method uses a geo-
+                                                                                   metric sequence of grids, each typically twice as ﬁne in
+MSE ≈ c1 N −1 + c2 h2                                                             each direction as its predecessor. If one were to use only the
+                                                                             607
+                                                                                                 Giles: Multilevel Monte Carlo Path Simulation
+608                                                                                        Operations Research 56(3), pp. 607–617, © 2008 INFORMS
+
+
+ﬁnest grid, the discretisation error would be very small, but       The key point here is that the quantity Pl − Pl−1 comes
+                                                                                                                            i     i
+
+the computational cost of a Jacobi or Gauss-Seidel iteration        from two discrete approximations with different timesteps
+would be very large. On a much coarser grid, the accu-              but the same Brownian path. This is easily implemented by
+racy is much less, but the cost is also much less. Multigrid        ﬁrst constructing the Brownian increments for the simula-
+solves the equations on the ﬁnest grid by computing cor-            tion of the discrete path leading to the evaluation of Pl ,
+                                                                                                                              i
+
+rections using all the grids, thereby achieving the ﬁne grid        and then summing them in groups of size M to give the
+accuracy at a much lower cost. This is a very simpliﬁed             discrete Brownian increments for the evaluation of Pl−1 .
+                                                                                                                             i
+
+explanation of multigrid, but it is the same essential idea                                                              −1
+                                                                    The variance of this simple estimator is V Yl  = Nl Vl ,
+that will be used here, retaining the accuracy/bias associ-         where Vl is the variance of a single sample. The same
+ated with the smallest timestep but using calculations with         inverse dependence on Nl would apply in the case of a
+larger timesteps to reduce the variance in a way that min-          more sophisticated estimator using stratiﬁed sampling or a
+imises the overall computational complexity.                        zero-mean control variate to reduce the variance.
+   A similar multilevel Monte Carlo idea has been used by                                                           
+                                                                       The variance of the combined estimator Y = Ll=0 Yl is
+Heinrich (2001) for parametric integration, in which one is
+interested in evaluating a quantity I , which is deﬁned as                   
+                                                                               L
+
+a multidimensional integral of a function that has a para-          V Y =         Nl−1 Vl 
+                                                                               l=0
+metric dependence on . Although the details of the method
+are quite different from Monte Carlo path simulation, the           The computational cost, if one ignores the asymptotically
+analysis of the computational complexity is quite similar.          negligible cost of the ﬁnal payoff evaluation, is propor-
+   This paper begins with the introduction of the new               tional to
+multilevel method and an outline of its asymptotic accu-
+racy and computational complexity for the simple problem            
+                                                                    L
+
+described above. The main theorem and its proof are then                  Nl h−1
+                                                                              l 
+                                                                    l=0
+presented. This establishes the computational complexity
+for a broad category of applications and numerical dis-             Treating the Nl as continuous variables, the variance is min-
+cretisations with certain properties. The applicability of the      imised for a ﬁxed   computational cost by choosing Nl to
+theorem to the Euler discretisation is a consequence of its         be proportional to Vl hl . This calculation of an optimal
+well-established weak and strong convergence properties.            number of samples Nl is similar to the approach used in
+Then, some reﬁnements to the method and its implemen-               optimal stratiﬁed sampling (Glasserman 2004), except that
+tation, and the effects of different payoff functions and           in this case we also include the effect of the different com-
+numerical discretisations are discussed. Finally, numerical         putational cost of the samples on different levels.
+results are presented to provide support for the theoretical           The above analysis holds for any value of L. We now
+analysis, and directions for further research are outlined.         assume that L      1, and consider the behaviour of Vl as
+                                                                    l → . In the particular case of the Euler discretisation and
+2. Multilevel Monte Carlo Method                                    the Lipschitz payoff function, provided aS t and bS t
+Consider Monte Carlo path simulations with different                satisfy certain conditions (Bally and Talay 1995, Kloeden
+timesteps hl = M −l T , l = 0 1     L. For a given Brownian   and Platen 1992, Talay and Tubaro 1990), there is Oh
+path W t, let P denote the payoff f ST , and let Sl M l     weak convergence and Oh1/2  strong convergence. Hence,
+                                                                    as l → ,
+and Pl denote the approximations to ST  and P using a
+numerical discretisation with timestep hl .
+                                                                    EPl − P  = Ohl                                                      (4)
+   It is clearly true that
+
+                      
+                      L                                             and
+EPL  = EP0  +         EPl − Pl−1 
+                      l=1                                           ESl M l − ST 2  = Ohl                                         (5)
+The multilevel method independently estimates each of the
+                                                                    From the Lipschitz property (2), it follows that
+expectations on the right-hand side in a way that minimises
+the computational complexity.
+                                                                    V Pl − P  ⩽ EPl − P 2  ⩽ c 2 ESl M l − ST 2 
+   Let Y0 be an estimator for EP0  using N0 samples, and
+let Yl for l > 0 be an estimator for EPl − Pl−1  using Nl
+paths. The simplest estimator that one might use is a mean          Combining this with (5) gives V Pl −P  = Ohl . Further-
+of Nl independent samples, which for l > 0 is                       more,
+
+             Nl
+                i                                               Pl − Pl−1  = Pl − P  − Pl−1 − P 
+                          i 
+Yl = Nl−1       Pl − Pl−1                                (3)                                                                2
+             i=1
+                                                                    =⇒ V Pl − Pl−1  ⩽ V Pl − P 1/2 + V Pl−1 − P 1/2 
+Giles: Multilevel Monte Carlo Path Simulation
+Operations Research 56(3), pp. 607–617, © 2008 INFORMS                                                                        609
+
+Hence, for the simple estimator (3), the single sample vari-       Proof. Using the notation x to denote the unique integer
+ance Vl is Ohl , and the optimal choice for Nl is asymp-         n satisfying the inequalities x ⩽ n < x + 1, we start by
+totically proportional to hl . Setting Nl = O−2 Lhl , the       choosing L to be
+variance of the combined estimator Y is O2 .                              √
+   If L is now chosen such that                                          log 2c1 T # −1 
+                                                                   L=                       
+      log −1                                                                 # log M
+L=            + O1
+       log M                                                       so that
+as  → 0, then hL = M −L = O and so the bias error
+                                                                   √1 M −#  < c h# ⩽ √1                                    (6)
+EPL − P  is O, due to (4). Consequently, we obtain an          2          1 L     2
+MSE that is O2 , with a computational complexity that
+                                                                   and hence, because of properties (i) and (ii),
+is O−2 L2  = O−2 log 2 .
+                                                                   EY − EP 2 ⩽ 21 2 
+3. Complexity Theorem
+The main theorem is worded quite generally so that it can          This 21 2 upper bound on the square of the bias error,
+be applied to a variety of ﬁnancial models with output func-       together with the 21 2 upper bound on the variance of the
+tionals that are not necessarily Lipschitz functions of the        estimator to be proved later, gives an 2 upper bound on
+terminal state, but might instead be a discontinuous func-         the estimator MSE.
+tion of the terminal state, or even path dependent as in              Also,
+the case of barrier and lookback options. The theorem also
+                                                                   
+                                                                   L                  
+                                                                                      L
+                                                                                                         M
+does not specify which numerical approximation is used.                  h−1   −1
+                                                                          l = hL             M −l <         h−1
+Instead, it proves a result concerning the computational           l=0                 l=0              M −1 L
+complexity of the multilevel method conditional on certain
+                                                                   using the standard result for a geometric series, and
+features of the underlying numerical approximation and the
+multilevel estimators. This approach is similar to that used                        −1/#
+                                                                                
+by Dufﬁe and Glynn (1995).                                         h−1
+                                                                    L  < M    √           
+                                                                                2c1
+Theorem 3.1. Let P denote a functional of the solution
+of SDE (1) for a given Brownian path W t, and let Pl            due to the ﬁrst inequality in (6). These two inequalities,
+denote the corresponding approximation using a numerical           combined with the observation that −1/# ⩽ −2 for # ⩾ 21
+discretisation with timestep hl = M −l T .                         and  < e−1 , give the following result, which will be used
+   If there exist independent estimators Yl based on Nl           later:
+Monte Carlo samples, and positive constants # ⩾ 21  $ c1        
+                                                                   L
+                                                                                 M2 √
+c2  c3 such that                                                        h−1
+                                                                          l <         2c1 1/# −2                          (7)
+   (i) EPl − P  ⩽ c1 h#l ,                                      l=0          M −1
+                   
+                     EP0          l = 0                          We now need to consider the different possible values
+           
+   (ii) EYl  =                                                   for $.
+                     EPl − Pl−1  l > 0
+                                                                      (a) If $ = 1, we set Nl = 2−2 L + 1c2 hl  so that
+   (iii) V Yl  ⩽ c2 Nl−1 h$l ,
+   (iv) Cl , the computational complexity of Yl , is bounded by              
+                                                                              L                  
+                                                                                                 L
+                                                                   V Y =         V Yl  ⩽         c2 Nl−1 hl ⩽ 21 2 
+Cl ⩽ c3 Nl h−1
+            l 
+                                                                              l=0                l=0
+
+then there exists a positive constant c4 such that for any         which is the required upper bound on the variance of the
+ < e−1 , there are values L and Nl for which the multilevel       estimator.
+estimator                                                             To bound the computational complexity C, we begin
+     
+     L                                                             with an upper bound on L given by
+Y = Yl                                                                              √
+     l=0                                                                log −1   log 2 c1 T # 
+                                                                   L⩽           +                 + 1
+has an MSE with bound                                                   # log M      # log M
+MSE ≡ EY − EP 2  < 2                                      Given that 1 < log −1 for  < e−1 , it follows that
+with a computational complexity C with bound                       L + 1 ⩽ c5 log −1 
+      −2
+     
+      c             $ > 1
+      4                                                           where
+C ⩽ c4 −2 log 2   $ = 1                                                                √          
+     
+                                                                           1            log 2c1 T # 
+      −2−1−$/#                                                  c5 =         + max 0                  + 2
+       c4            0 < $ < 1
+                                                                        # log M             # log M
+                                                                                                                     Giles: Multilevel Monte Carlo Path Simulation
+610                                                                                                          Operations Research 56(3), pp. 607–617, © 2008 INFORMS
+
+
+Upper bounds for Nl are given by                                                       Because
+
+Nl ⩽ 2−2 L + 1c2 hl + 1                                                            
+                                                                                       L
+                                                                                              −1−$/2       −1−$/2 
+                                                                                                                      L
+                                                                                             hl          = hL                 M −1−$/2 l
+                                                                                       l=0                              l=0
+Hence, the computational complexity is bounded by                                                           −1−$/2
+                                                                                                         < hL        1 − M −1−$/2 −1                        (9)
+                                                                       
+               
+               L                                            
+                                                            L
+C ⩽ c3               Nl h−1       −2      2
+                         l ⩽ c3 2 L + 1 c2 +                   h−1
+                                                                   l                  we again obtain a 21 2 upper bound on the variance of the
+               l=0                                          l=0                        estimator.
+Using the upper bound for L + 1 and inequality (7), and                                   Using the Nl upper bound
+the fact that 1 < log −1 for  < e−1 , it follows that C ⩽                                               −1−$/2                              $+1/2
+                                                                                       Nl < 2−2 c2 hL               1 − M −1−$/2 −1 hl               + 1
+c4 −2 log 2 , where
+
+                             M2 √                                                      the computational complexity is bounded by
+c4 = 2c3 c52 c2 + c3              2c1 1/# 
+                            M −1                                                                             −1−$/2
+                                                                                       C ⩽ c3 2−2 c2 hL                1 − M −1−$/2 −1
+  (b) For $ > 1, setting
+                                                                                                                        
+               −2       $−1/2                        $+1/2                                   
+                                                                                                   L
+                                                                                                       −1−$/2  L
+                                                                                                                     −1
+Nl = 2 c2 T                       1 − M −$−1/2 −1 hl                                        · hl          + hl 
+                                                                                                   l=0           l=0
+then
+                                                                                       Using inequality (9) gives
+
+L                                                          
+                                                           L
+      V Yl  ⩽ 21 2 T −$−1/2 1 − M −$−1/2 
+                                                                  $−1/2
+                                                                 hl                    −1−$/2                              
+                                                                                                                              L
+                                                                                                                                     −1−$/2
+l=0                                                        l=0                         hL          1 − M −1−$/2 −1              hl
+                                                                                                                              l=0
+Using the standard result for a geometric series,                                                −1−$
+                                                                                              < hL      1 − M −1−$/2 −2 
+
+L
+       $−1/2                     
+                                   L
+      hl             = T $−1/2         M −$−1/2 l                                The ﬁrst inequality in (6) gives
+l=0                                l=0
+                                                                                        −1−$
+                                                                                                  √
+                     < T $−1/2 1 − M −$−1/2 −1                            (8)   hL      <  2c1 1−$/# M 1−$ −1−$/# 
+
+and hence we obtain a 21 2 upper bound on the variance of                             Combining the above two inequalities, and also using in-
+the estimator.                                                                         equality (7) and the fact that −2 < −2−1−$/# for  < e−1 ,
+  Using the Nl upper bound                                                             gives C ⩽ c4 −2−1−$/# , where
+                                                                                                    √
+                                                          $+1/2                      c4 = 2c3 c2  2c1 1−$/# M 1−$ 1 − M −1−$/2 −2
+Nl < 2−2 c2 T $−1/2 1 − M −$−1/2 −1 hl                         + 1
+                                                                                                    M2 √
+the computational complexity is bounded by                                                  + c3          2c1 1/#  
+                                                                                                  M −1
+                                                                                          The theorem and proof show the importance of the
+C ⩽ c3 2−2 c2 T $−1/2 1 − M −$−1/2 −1                                           parameter $, which deﬁnes the convergence of the variance
+                                                                                      Vl as l → . In this limit, the optimal Nl is proportional
+                 
+                 L
+                     $−1/2  L
+                                  −1                                                   to Vl hl = Ohl
+                                                                                                         $+1/2
+                                                                                                                 , and hence the computational effort
+                · hl         + hl                                                                                       $−1/2
+                                                                                            −1
+                 l=0          l=0                                                      Nl hl is proportional to Ohl             . This shows that for
+                                                                                       $ > 1, the computational effort is primarily expended on
+Using inequalities (7) and (8) gives C ⩽ c4 −2 , where                                the coarsest levels; for $ < 1, it is on the ﬁnest levels; and
+                                                                                       for $ = 1, it is roughly evenly spread across all levels.
+                                                           M2 √
+c4 = 2c3 c2 T $−1 1 − M −$−1/2 −2 + c3                      2c1 1/#                In applying the theorem in different contexts, there will
+                                                          M −1                         often be existing literature on weak convergence that will
+  (c) For $ < 1, setting                                                               establish the correct exponent # for condition (i). Con-
+                                                                                       structing estimators with properties (ii) and (iv) is also
+                                           $+1/2 
+              −1−$/2
+Nl = 2−2 c2 hL        1 − M −1−$/2 −1 hl                                         straightforward. The main challenge will be in determining
+                                                                                       and proving the appropriate exponent $ for (iii). An even
+then                                                                                   bigger challenge might be to develop better estimators with
+                                                                                       a higher value for $.
+
+L
+              1                             L
+                                                                                          In the case of the Euler discretisation with a Lipschitz
+    V Yl  < 2 hL
+                   1−$/2                      −1−$/2
+                           1 − M −1−$/2  hl          
+l=0           2                             l=0
+                                                                                       payoff, there is existing literature on the conditions on
+Giles: Multilevel Monte Carlo Path Simulation
+Operations Research 56(3), pp. 607–617, © 2008 INFORMS                                                                                  611
+
+aS t and bS t for Oh weak convergence and Oh1/2          which corresponds to c2 = M − 1c0 in Theorem 3.1. This
+strong convergence (Bally and Talay 1995, Kloeden and              results in
+Platen 1992, Talay and Tubaro 1990), which in turn gives
+$ = 1 as explained earlier.                                        Nl ≈ 2−2 L + 1M − 1c0 hl 
+   The convergence is degraded if the payoff function
+f ST  has a discontinuity. In this case, for a given           so the computational cost of evaluating Yl is proportional to
+timestep hl , a fraction of the paths of size Oh1/2
+                                                 l  will have     Nl h−1   −1          −1       −1
+                                                                        l + hl−1  = Nl hl 1 + M    
+a ﬁnal Sl M l that is Oh1/2
+                            l  from the discontinuity. With
+the Euler discretisation, this fraction of the paths has an                                   ≈ 2−2 L + 1M − M −1 c0 
+O1 probability of Pl − Pl−1 being O1, due to Sl M l and
+Sl−1 M l−1 being on opposite sides of the discontinuity, and     Because L = Olog −1 / log M, summing the costs of all
+                                                                   levels, we conclude that asymptotically, as  → 0, the total
+therefore Vl = Oh1/2               1
+                      l  and $ = 2 . Because the weak order
+                                                                   computational cost is roughly proportional to
+of convergence is still Ohl  (Bally and Talay 1995) so
+# = 1, the overall complexity is O−25 , which is still bet-    2−2 log 2 f M
+ter than the O−3  complexity of the standard Monte Carlo
+method with an Euler discretisation. Further improvement           where
+could be possible through the use of adaptive sampling
+techniques which increase the sampling of those paths with                            M − M −1
+                                                                   f M =                     
+large values for Pl − Pl−1 (Glasserman et al. 1999, Kahn                            log M2
+1956, Liu 2001).                                                   This function is illustrated in Figure 1. Its minimum near
+   If the Euler discretisation is replaced by Milstein’s           M = 7 is about half the value at M = 2, giving twice the
+method for a scalar SDE, its Oh strong convergence re-           computational efﬁciency. The numerical results presented
+sults in Vl = Oh2l  for a Lipschitz payoff. Current research     later are all obtained using M = 4. This gives most of the
+is investigating how to achieve a similar improvement in the       beneﬁts of a larger value of M, but at the same time M is
+convergence rate for lookback, barrier, and digital options,       small enough to give a reasonable number of levels from
+based on the appropriate use of Brownian interpolation             which to estimate the bias, as explained in the next section.
+(Glasserman 2004), as well as the extension to multidimen-
+sional SDEs.                                                       4.2. Bias Estimation and Richardson
+                                                                        Extrapolation
+4. Extensions                                                      In the multilevel method, the estimates for the correction
+                                                                   EPl − Pl−1  at each level give information that can be used
+4.1. Optimal M
+                                                                   to estimate the remaining bias. In particular, for the Euler
+The analysis so far has not speciﬁed the value of the inte-        discretisation with a Lipschitz payoff, asymptotically, as
+ger M, which is the factor by which the timestep is reﬁned         l→ ,
+at each level. In the multigrid method for the iterative solu-
+tion of discretisations of elliptic PDEs, it is usually optimal    EP − Pl  ≈ c1 hl
+to use M = 2, but that is not necessarily the case with the
+multilevel Monte Carlo method introduced in this paper.            Figure 1.              A plot of the function M − M −1 /log M2 .
+   For the simple Euler discretisation with a Lipschitz pay-
+off, V Pl − P  ≈ c0 hl asymptotically, for some positive con-                                    f (M ) = (M – M –1)/(log M)2
+stant c0 . This corresponds to the case $ = 1 in Theorem 3.1.               3.2
+
+From the identity
+                                                                            3.0
+
+Pl − Pl−1  = Pl − P  − Pl−1 − P 
+                                                                            2.8
+
+we obtain, asymptotically, the upper and lower bounds                       2.6
+                                                                    f (M)
+
+
+
+
+ √                                    √
+ M − 12 c0 hl ⩽ V Pl − Pl−1  ⩽  M + 12 c0 hl                       2.4
+
+
+with the two extremes corresponding to perfect correlation                  2.2
+and anticorrelation between Pl − P and Pl−1 − P .
+  Suppose now that the value of V Pl − Pl−1  is given                   2.0
+approximately by the geometric mean of the two bounds,
+                                                                            1.8
+                                                                                  2       4        6        8        10       12   14   16
+V Pl − Pl−1  ≈ M − 1c0 hl                                                                                M
+                                                                                         Giles: Multilevel Monte Carlo Path Simulation
+612                                                                              Operations Research 56(3), pp. 607–617, © 2008 INFORMS
+
+
+for some constant c1 , and hence                                  The equation for the optimal Nl is
+                                                                                             
+                                                                                  L 
+                                                                                   
+EPl − Pl−1  ≈ M − 1c1 hl ≈ M − 1EP − Pl             Nl = 2 −2
+                                                                             Vl hl     Vl /hl                                   (12)
+                                                                                       l=0
+   This information can be used in one of two ways. The
+                                                                This makes the estimated variance of the combined multi-
+ﬁrst is to use it as an approximate bound on the remaining
+                                                                level estimator less than 21 2 , while Equation (10) tries to
+  √ so that to obtain a bias which has magnitude less than
+bias,
+                                                                ensure that the bias is less than √12 . Together, they should
+/ 2, one increases the value for L until
+                                                                give an MSE that is less than 2 , with  being a user-
+                                                                speciﬁed r.m.s. accuracy.
+YL  < √12 M − 1                                             In Step 4, the optimal Nl from Step 3 is compared to
+                                                                the number of samples already calculated at that level. If
+Being more cautious, the condition we use in the numerical      the optimal Nl is larger, then the appropriate number of
+results presented later is                                      additional samples are calculated. The estimate for Vl is
+                                                                then updated, and this improved estimate is used if Step 3
+max(M −1 YL−1  YL ) < √12 M − 1              (10)    is revisited.
+                                                                   It is important to note that this algorithm is heuristic; it
+This ensures that the remaining error based on an extrapo-      is not guaranteed to achieve an MSE error that is O2 .
+lation from either of the two ﬁnest timesteps is within the     The main theorem in §3 does provide a guarantee, but the
+desired range. This modiﬁcation is designed to avoid pos-       conditions of the theorem assume a priori knowledge of the
+sible problems due to a change in sign of the correction,       constants c1 and c2 governing the weak convergence and
+EPl − Pl−1 , on successive reﬁnement levels.                the variance convergence as h → 0. These two constants
+   An alternative approach is to use Richardson extrapola-      are in effect being estimated in the numerical algorithm
+tion to eliminate the leading order bias. Because EP − PL    described above.
+≈ M − 1−1 EPL − PL−1 , by changing the combined              The accuracy of the variance estimate at each level
+estimator to                                                    depends on the size of the initial sample set. If this initial
+                                                                sample size were made proportional to −p for some expo-
+                                                       
+ 
+ L
+                           M          L                        nent 0 < p < 2 − 1/#, then as  → 0, it could be proved
+      Yl +M −1−1 YL =        Y0 + Yl −M −1 Yl−1       that the variance estimate will converge to the true value
+  l=0                     M −1        l=1
+                                                                with probability 1, without an increase in the order of the
+the leading order bias is eliminated and the remaining bias     computational complexity.
+is ohL , usually either Oh3/2           2                       The weakness in the heuristic algorithm lies in the bias
+                               L  or OhL . The advantage
+of rewriting the new combined estimator in the form shown       estimation, and it does not appear to be easily resolved.
+above on the right-hand side is that one can monitor the        Suppose that the numerical algorithm determines that L
+convergence of the terms Yl − M −1 Yl−1 to decide when the    levels are required. If pS represents the probability den-
+remaining bias is sufﬁciently small, in exactly the same way    sity function for the ﬁnal state ST  deﬁned by the SDE,
+as described previously for Yl . Assuming the remaining bias   and pl S, l = 0 1     L are the corresponding probability
+                                                                densities for the level l numerical approximations, then in
+is Oh2L , the appropriate convergence test is
+                                                                general pS and pl S are likely to be linearly indepen-
+                                                                dent, so
+YL − M −1 YL−1  < √12 M 2 − 1                   (11)
+                                                                                
+                                                                                L
+                                                                pS = gS +         al pl S
+5. Numerical Algorithm                                                          l=0
+
+Putting together the elements already discussed, the multi-     for some set of coefﬁcients al and a nonzero function gS
+level algorithm used for the numerical tests is as follows:     that is orthogonal to pl S. If we consider gS to be an
+   Step 1. Start with L = 0.                                    increment to the payoff function, then its numerical expec-
+   Step 2. Estimate VL using an initial set of NL = 104 sam-    tation on each level is zero because
+ples.                                                                     
+   Step 3. Deﬁne optimal Nl , l = 0     L, using Equa-     Epl g = gSpl S dS = 0
+tion (12).
+   Step 4. Evaluate extra samples at each level as needed       while its true expectation is
+for new Nl .                                                                              
+   Step 5. If L ⩾ 2, test for convergence using Equa-           Ep g = gSpS dS = g 2 S dS > 0
+tion (10) or Equation (11).
+   Step 6. If L < 2 or it is not converged, set L += L + 1      Hence, by adding an arbitrary amount of gS to the
+and go to Step 2.                                               payoff, we obtain an arbitrary perturbation of the true
+Giles: Multilevel Monte Carlo Path Simulation
+Operations Research 56(3), pp. 607–617, © 2008 INFORMS                                                                                                                   613
+
+expected payoff, but the heuristic algorithm will on aver-      6. Numerical Results
+age terminate at the same level L with the same expected
+value.                                                          6.1. Geometric Brownian Motion
+   This is a fundamental problem that also applies to           Figures 2–5 present results for a simple geometric Brownian
+the standard Monte Carlo algorithm. In practice, it might       motion,
+require additional a priori knowledge or experience to
+choose an appropriate minimum value for L to achieve a          dS = rS dt + /S dW                              0 < t < 1
+given accuracy. Being cautious, one is likely to use a value
+for L that is larger than required in most cases. In this       with S0 = 1, r = 005, and / = 02, and four different
+case, the use of the multilevel method will yield signiﬁcant    payoff options.
+additional beneﬁts. For the standard Monte Carlo method,           By switching to the new variable X = log S, it is pos-
+the computational cost is proportional to M L , the number      sible to construct a numerical approximation that is exact,
+of timesteps on the ﬁnest level, whereas for the multilevel     but here we directly simulate the geometric Brownian
+method with the Euler discretisation and a Lipschitz payoff,    motion using the Euler discretisation as an indication of the
+the cost is proportional to L2 . Thus, the computational cost   behaviour with more complex models, for example, those
+of being cautious in the choice of L is much less severe        with a local volatility function /S t.
+for the multilevel algorithm than for the standard Monte
+                                                                   6.1.1. European Option. The results in Figure 2 are
+Carlo.
+                                                                for the European call option for which the discounted pay-
+   Even better would be a multilevel application with a vari-
+                                                                off function is
+ance convergence rate $ > 1; for this, the computational
+cost is approximately independent of L, suggesting that one
+                                                                P = exp−r max0 S1 − 1
+could use a value for L that is much larger than necessary.
+If there is a known value for L that is guaranteed to give      The top left plot shows the behaviour of the variance of
+a bias that is much less than , then it might be possible      both Pl and Pl − Pl−1 . The quantity plotted is the logarithm
+to deﬁne a numerical algorithm that will provably achieve       base M (M = 4 for all numerical results in this paper) ver-
+an MSE error of 2 at a cost that is O−2 ; this will be an   sus the grid level. The reason for this choice is that a slope
+area for future research.                                       of −1 corresponds to a variance that is exactly proportional
+   In reporting the numerical results later, we deﬁne the       to M −l , which in turn is proportional to hl . The slope of the
+computational cost as the total number of timesteps per-        line for Pl − Pl−1 is indeed approximately −1, indicating
+formed on all levels,                                           that Vl = V Pl − Pl−1  = Oh. For l = 4, Vl is more than
+              
+              L
+C = N0 +            Nl M l + M l−1                           Figure 2.                      Geometric Brownian motion with European
+              l=1
+                                                                                               option (value ≈ 010).
+The term M l + M l−1 reﬂects the fact that each sample at                         0                                                        0
+level l > 0 requires the computation of one ﬁne path with
+                                                                                                                                          –2
+M l timesteps and one coarse path with M l−1 timesteps.                          –2
+
+   The computational costs are compared to those of the
+                                                                 logM variance
+
+
+
+
+                                                                                                                                          –4
+                                                                                                                            logM |mean|
+
+
+
+
+                                                                                 –4
+standard Monte Carlo method, which is calculated as                                                                                       –6
+                                                                                 –6
+       
+       L
+                                                                                                                                          –8
+C∗ =         Nl∗ M l                                                                                                                                   Pl
+                                                                                 –8           Pl                                                        Pl –Pl–1
+       l=0                                                                                                                          –10
+                                                                                              Pl –Pl–1                                                  Yl –Yl–1/M
+where Nl∗ = 2−2 V Pl  so that the variance of the esti-                  –10
+                                                                                      0   1         2        3         4
+                                                                                                                                    –12
+                                                                                                                                               0    1        2       3     4
+mator is 21 2 as with the multilevel method. The summa-                                            l                                                        l
+tion over the grid levels corresponds to an application of            1010                                                            101
+the standard Monte Carlo algorithm on each grid level                                                    ε = 0.00005
+                                                                                                         ε = 0.0001
+to enable the estimation of the bias in order to apply                                                   ε = 0.0002
+                                                                          108                            ε = 0.0005
+the same heuristic termination criterion as the multilevel                                               ε = 0.001
+                                                                                                                                      100
+                                                                                                                           ε2 cost
+
+
+
+
+method.
+                                                                Nl
+
+
+
+
+   Results are also shown for Richardson extrapolation in                 106
+                                                                                                                                  10 –1
+conjunction with both the multilevel and standard Monte                                                                                                 Std MC
+Carlo methods. The costs for these are deﬁned in the same                 104                                                                           Std MC ext
+                                                                                                                                                        MLMC
+way; the difference is in the choice of L, and the deﬁnition                                                                     10 –2                  MLMC ext
+of the extrapolated estimator that has a slightly different                       0       1        2         3         4                           10 –4                 10 –3
+                                                                                                                                                             ε
+variance.                                                                                          l
+                                                                                                             Giles: Multilevel Monte Carlo Path Simulation
+614                                                                                                 Operations Research 56(3), pp. 607–617, © 2008 INFORMS
+
+
+1,000 times smaller than the variance V Pl  of the standard    Figure 3.                      Geometric Brownian motion with Asian
+Monte Carlo method with the same timestep.                                                       option (value ≈ 0058).
+   The top right plot shows the mean value and correc-                             0                                                         0
+tion at each level. Both top plots are based on results from
+4 × 106 paths. The slope of approximately −1 again implies                        –2                                                        –2
+an Oh convergence of EPl − Pl−1 . Even at l = 3, the rel-
+
+
+
+
+                                                                  logM variance
+                                                                                                                                            –4
+ative error EP − Pl /EP  is less than 10−3 . Also plotted
+
+
+
+
+                                                                                                                              logM |mean|
+                                                                                  –4
+is a line for the multilevel method with Richardson extrap-                                                                                 –6
+
+olation, showing signiﬁcantly faster weak convergence.                            –6
+                                                                                                                                            –8
+   The bottom two plots have results from two sets of mul-                        –8
+                                                                                                                                                         Pl
+                                                                                                Pl                                                       Pl –Pl–1
+tilevel calculations, with and without Richardson extrap-                                       Pl –Pl–1
+                                                                                                                                      –10
+                                                                                                                                                         Yl –Yl–1/M
+olation, for ﬁve different values of . Each line in the                     –10                                                      –12
+                                                                                       0    1        2         3         4                       0   1       2        3    4
+bottom left plot corresponds to one multilevel calculation                                           l                                                        l
+and shows the values for Nl , l = 0     L, with the values           1010                                                              101
+decreasing with l because of the decrease in both Vl and hl .                                              ε = 0.00005
+                                                                                                           ε = 0.0001
+It also shows that the value for L, the maximum level of                                                   ε = 0.0002
+                                                                              108
+timestep reﬁnement, increases as the value for  decreases.                                                ε = 0.0005                       100
+                                                                                                           ε = 0.001
+   The bottom right plot shows the variation of the compu-
+
+
+
+
+                                                                                                                             ε2 cost
+                                                                  Nl
+tational complexity C (as deﬁned in the previous section)                     106
+                                                                                                                                      10 –1
+with the desired accuracy . The plot is of 2 C versus 
+                                                                                                                                                         Std MC
+because we expect to see that 2 C is only very weakly                                                                                                   Std MC ext
+                                                                              104
+dependent on  for the multilevel method. Indeed, it can                                                                             10 –2
+                                                                                                                                                         MLMC
+                                                                                                                                                         MLMC ext
+be seen that without Richardson extrapolation, 2 C is a
+                                                                                       0    1        2         3         4                           10 –4                10 –3
+very slowly increasing function of −1 for the multilevel                                            l                                                        ε
+methods, in agreement with the theory that predicts it to
+be asymptotically proportional to log 2 . For the stan-
+dard Monte Carlo method, theory predicts that 2 C should         which is approximated numerically by
+be proportional to the number of timesteps on the ﬁnest                            Nl
+                                                                                     1
+level, which in turn is roughly proportional to −1 due to        S̄l =                    Sn + Sn−1 hl 
+the weak convergence property. This is shown in the ﬁg-                            n=1 2
+ure, with the “staircase” effect corresponding to the fact        The Ohl  convergence of both Vl and EPl − Pl−1  is
+that L = 2 for  = 0001 00005, and L = 3 for  =               similar to the European option case, but in this case the
+00002 00001 00005.                                           Richardson extrapolation does not seem to have improved
+   With Richardson extrapolation, a priori theoretical anal-      the order of weak convergence. Hence, the reliability of the
+ysis predicts that 2 C for the standard Monte Carlo method       bias estimation and grid level termination must be ques-
+should be approximately proportional to −1/2 . However,          tioned for the Richardson extrapolation. Without extrapola-
+with extrapolation the numerical results require no more          tion, the multilevel method is up to 30 times more efﬁcient
+than the minimum two levels of reﬁnement to achieve the           than the standard Monte Carlo method.
+desired accuracy, and so 2 C is found to be independent of
+ for the range of  in the tests. Nevertheless, for the most        6.1.3. Lookback Option. The results in Figure 4 are
+accurate case with  = 5 × 10−5 , the multilevel method is        for the lookback option
+                                                                                            
+still approximately 10 times more efﬁcient than the stan-         P = exp−r S1 − min St 
+dard Monte Carlo method when using extrapolation, and                                                          0<t<1
+
+more than 60 times more efﬁcient without extrapolation.           The minimum value of St over the path is approximated
+   As a ﬁnal check on the reliability of the heuristics in the    numerically by
+multilevel numerical algorithm, 10 sets of multilevel calcu-                                
+lations have been performed for each value of , and the          Smin l = min Sn 1 − $∗ / hl 
+                                                                                            n
+root-mean-square error (RMSE) is computed and compared
+to the target accuracy of . For all cases, with and without
+                                                                       ∗
+                                                                  $ ≈ 05826 is a constant that corrects the Oh1/2  lead-
+Richardson extrapolation, the ratio RMSE/ was found to           ing order error due to the discrete sampling of the path,
+be in the range 0.43–0.96, indicating that the algorithm is       and thereby restores Oh weak convergence (Broadie et al.
+correctly achieving the desired accuracy.                         1997). Richardson extrapolation clearly works well in this
+                                                                  case, improving the weak convergence to second order.
+   6.1.2. Asian Option. Figure 3 has results for the Asian        This has a signiﬁcant effect on the number of grid levels
+option payoff, P = exp−r max0 S̄ − 1, where                  required, so that the multilevel method gives savings of up
+      1                                                          to factor 65 without extrapolation, but up to only four with
+S̄ =     St dt                                                 extrapolation.
+      0
+Giles: Multilevel Monte Carlo Path Simulation
+Operations Research 56(3), pp. 607–617, © 2008 INFORMS                                                                                                                                                                                       615
+
+Figure 4.                            Geometric Brownian motion with lookback                                                        achieve comparable accuracy, and the efﬁciency gains of
+                                     option (value ≈ 017).                                                                         the multilevel method are reduced accordingly. Richardson
+                                                                                                                                    extrapolation is extremely effective in this case, although
+                   0                                                              0
+                                                                                                                                    the resulting order of weak convergence is unclear, but
+                  –2                                                             –2                                                 the multilevel method still offers some additional compu-
+                                                                                                                                    tational savings.
+  logM variance
+
+
+
+
+                                                                                 –4
+
+
+
+
+                                                                   logM |mean|
+                  –4                                                                                                                   The accuracy of the heuristic algorithm is again tested by
+                                                                                 –6                                                 performing 10 sets of multilevel calculations and compar-
+                  –6
+                                                                                 –8
+                                                                                                                                    ing the RMSE error to the target accuracy . The ratio is
+                                                                                                      Pl                            in the range 0.55–1.0 for all cases, with and without
+                  –8                Pl                                                                Pl –Pl –1
+                                    Pl – Pl–1
+                                                                           –10
+                                                                                                      Yl –Yl–1/M
+                                                                                                                                    extrapolation.
+            –10                                                            –12
+                       0   1          2         3       4    5                        0       1         2           3    4      5   6.2. Heston Stochastic Volatility Model
+                                          l                                                                 l
+           1010                                                                  102                                                Figure 6 presents results for the same European call payoff
+                                                ε = 0.0001                                                                          considered previously, but this time based on the Heston
+                                                ε = 0.0002
+                                                ε = 0.0005                       101
+                                                                                                                                    stochastic volatility model (Heston 1993):
+                 108                            ε = 0.001
+                                                                                                                                                  √
+                                                ε = 0.002                                                                           dS = rS dt + V S dW1  0 < t < 1
+                                                                                                                                                            √
+                                                                 ε2 cost
+
+
+
+
+                                                                                 100
+                                                                                                                                    dV = / 2 − V  dt + 2 V dW2 
+  Nl
+
+
+
+
+             106
+
+                                                                          10 –1                       Std MC                        with S0 = 1, V 0 = 004, r = 005, / = 02, = 5,
+             104
+                                                                                                      Std MC ext                    2 = 025, and correlation 3 = −05 between dW1 and dW2 .
+                                                                                                      MLMC
+                                                                          10 –2                       MLMC ext                        The accuracy and variance are both improved by deﬁning
+                       0   1          2        3        4    5                        10 –4                             10 –3       a new variable
+                                          l                                                                 ε
+                                                                                                                                    W = e t V − / 2 
+   6.1.4. Digital Option. The ﬁnal payoff that is consid-                                                                           and applying the Euler discretisation to the SDEs for W
+ered is a digital option, P = exp−rH S1 − 1, where                                                                            and S, which results in the discrete equations
+Hx is the Heaviside function. The results in Figure 5                                                                                                    
+show that Vl = Oh1/2                                                                                                               Sn+1 = Sn + r Sn h + Vn+ Sn W1 n 
+                     l , instead of the Ohl  convergence
+of all of the previous options. Because of this, much larger                                                                                                                     
+values for Nl on the ﬁner reﬁnement levels are required to                                                                          Vn+1 = / 2 + e− h Vn − / 2  + 2 Vn+ W2 n 
+
+Figure 5.                            Geometric Brownian motion with digital                                                         Figure 6.                      Heston model with European option
+                                     option (value ≈ 053).                                                                                                        (value ≈ 010).
+                   0                                                              0                                                                   0                                                         0
+
+                                                                                 –2                                                                 –2                                                         –2
+                  –2
+                                                                                                                                    logM variance
+
+
+
+
+                                                                                                                                                                                                               –4
+ logM variance
+
+
+
+
+                                                                                 –4
+                                                                                                                                                                                                 logM |mean|
+                                                                  logM |mean|
+
+
+
+
+                  –4                                                                                                                                –4
+                                                                                 –6                                                                                                                            –6
+                  –6                                                                                                                                –6
+                                                                                 –8                                                                                                                            –8
+                                                                                                      Pl                                                                                                                    Pl
+                  –8               Pl                                                                                                               –8            Pl                                      –10               Pl –Pl –1
+                                                                           –10                        Pl –Pl–1
+                                   Pl – Pl–1                                                          Yl –Yl–1/M                                                  Pl –Pl–1                                                  Yl –Yl–1/M
+           –10                                                             –12                                                                      –10                                                   –12
+                       0       1          2         3        4                        0           1         2            3      4                         0   1         2        3         4                        0   1       2        3      4
+                                          l                                                                 l                                                           l                                                        l
+                                                                                                                                              1010                                                             101
+                                                ε = 0.0002                       102                                                                                         ε = 0.00005
+        1010                                    ε = 0.0005                                                                                                                   ε = 0.0001
+                                                ε = 0.001                                                                                                                    ε = 0.0002
+                                                ε = 0.002                                                                                           108                      ε = 0.0005                        100
+            108                                 ε = 0.005                                                                                                                    ε = 0.005
+                                                                 ε2 cost
+
+
+
+
+                                                                                   1
+                                                                                 10
+                                                                                                                                                                                               ε2 cost
+Nl
+
+
+
+
+                                                                                                                                    Nl
+
+
+
+
+                   6
+                                                                                                                                                    106
+            10                                                                                                                                                                                           10 –1
+                                                                                                      Std MC                                                                                                                Std MC
+                                                                                 100                  Std MC ext                                                                                                            Std MC ext
+                                                                                                      MLMC                                          104                                                                     MLMC
+            104                                                                                       MLMC ext                                                                                          10 –2               MLMC ext
+                       0       1          2         3        4                                              10 –3                                         0   1        2         3         4                            10 –4                10 –3
+                                          l                                                                     ε                                                       l                                                        ε
+                                                                                                Giles: Multilevel Monte Carlo Path Simulation
+616                                                                                       Operations Research 56(3), pp. 607–617, © 2008 INFORMS
+
+            √                    √        
+Note that V is replaced by V + ≡ maxV  0, but as                     A second area for research concerns the heuristic nature
+h → 0, the probability of the discrete approximation to the          of the multilevel numerical procedure. It would clearly be
+volatility becoming negative approaches zero for the chosen          desirable to have a numerical procedure that is guaranteed
+values of , /, 2 (Kahl and Jäckel 2006).                             to give an MSE of less than 2 . This might be achievable
+   Because the volatility does not satisfy a global Lipschitz        by using estimators with $ > 1, so that one can use an
+condition, there is no existing theory to predict the order          excessively large value for L without signiﬁcant computa-
+of weak and strong convergence. The numerical results                tional penalty, thereby avoiding the problems with the bias
+suggest the variance is decaying slightly slower than ﬁrst           estimation.
+order, while the weak convergence appears slightly faster               Third, the multilevel method needs to be tested on much
+than ﬁrst order. The multilevel method without Richardson            more complex applications, more representative of the chal-
+extrapolation gives savings of up to factor 10 compared to           lenges faced in the ﬁnance community. This includes pay-
+the standard Monte Carlo method. Using a reference value             offs that involve evaluations at multiple intermediate times
+computed using the numerical method of Kahl and Jäckel               in addition to the value at maturity, and basket options that
+(2005), the ratio of the RMSE error to the target accuracy          involve high-dimensional SDEs.
+is found to be in the range 0.49–1.01.                                  Finally, it may be possible to further reduce the com-
+   The results with Richardson extrapolation are harder to           putational complexity by switching to quasi Monte Carlo
+interpret. The order of weak convergence does not appear             methods such as Sobol sequences and lattice rules (Kuo
+to be improved. The computational cost is reduced, but this          and Sloan 2005, L’Ecuyer 2004). This is likely to be par-
+is due to the heuristic termination criterion that assumes the       ticularly effective in conjunction with improved estimators
+remaining error after extrapolation is second order, which           with $ > 1 because in this case, the optimal Nl for the true
+it is not. Consequently, the ratio of the RMSE error to the          Monte Carlo sampling leads to the majority of the com-
+target accuracy  is in the range 0.66–1.23, demonstrating           putational effort being applied to extremely coarse paths.
+that the termination criterion is not reliable in combination        These are ideally suited to the use of quasi Monte Carlo
+with extrapolation for this application.                             techniques, which might be able to lower the computational
+                                                                     cost toward O−1  to achieve an MSE of 2 .
+7. Concluding Remarks
+In this paper, we have shown that a multilevel approach,             Acknowledgments
+using a geometric sequence of timesteps, can reduce the              The author is grateful to Mark Broadie, Paul Glasserman,
+order of complexity of Monte Carlo path simulations. If we           and Terry Lyons for discussions on this work and their very
+consider the generation of a discrete Brownian path through          helpful comments on drafts of the paper.
+a recursive Brownian bridge construction, starting with the
+end points W0 and WT at level 0, then computing the mid-
+point WT /2 at level 1, then the interval midpoints WT /4 ,          References
+W3T /4 at level 2, and so on, then an interpretation of the          Bally, V., D. Talay. 1995. The law of the Euler scheme for stochastic
+multilevel method is that the level l correction, EPl − Pl−1 ,        differential equations, I: Convergence rate of the distribution function.
+                                                                          Probab. Theory and Related Fields 104(1) 43–60.
+corresponds to the effect on the expected payoff due to the
+                                                                     Briggs, W. M., V. E. Henson, S. F. McCormick. 2000. A Multigrid Tuto-
+extra detail that is brought into the Brownian bridge con-                rial, 2nd ed. SIAM, Philadelphia.
+struction at level l.                                                Broadie, M., P. Glasserman, S. Kou. 1997. A continuity correction for
+   The numerical results for a range of model problems                    discrete barrier options. Math. Finance 7(4) 325–348.
+show that the multilevel algorithm is efﬁcient and reliable          Dufﬁe, D., P. Glynn. 1995. Efﬁcient Monte Carlo simulation of security
+in achieving the desired accuracy, whereas the use of                     prices. Ann. Appl. Probab. 5(4) 897–905.
+Richardson extrapolation is more problematic; in some                Emsermann, M., B. Simon. 2002. Improving simulation efﬁciency with
+cases it works well, but in other cases it fails to double the            quasi control variates. Stochastic Models 18(3) 425–448.
+                                                                     Gaines, J. G., T. J. Lyons. 1994. Random generation of stochastic integrals.
+weak order of convergence and hence does not achieve the
+                                                                          SIAM J. Appl. Math. 54(4) 1132–1146.
+target accuracy.
+                                                                     Glasserman, P. 2004. Monte Carlo Methods in Financial Engineering.
+   A number of areas for further research arise this work.                Springer-Verlag, New York.
+One is the development of improved estimators giving a               Glasserman, P., P. Heidelberger, P. Shahabuddin, T. Zajic. 1999. Multi-
+convergence order $ > 1. For scalar SDEs, the Milstein                    level splitting for estimating rare event probabilities. Oper. Res. 47
+discretisation gives $ = 2 for Lipschitz payoffs, but more                585–600.
+work is required to obtain improved convergence for                  Heinrich, S. 2001. Multilevel Monte Carlo Methods, Lecture Notes in
+                                                                          Computer Science, Vol. 2179. Springer-Verlag, Berlin, 58–67.
+lookback, barrier, and digital options. The extension to
+                                                                     Heston, S. I. 1993. A closed-form solution for options with stochastic
+multidimensional SDEs is also challenging because, in                     volatility with applications to bond and currency options. Rev. Finan-
+most cases, the Milstein discretisation requires the simu-                cial Stud. 6 327–343.
+lation of Lévy areas (Gaines and Lyons 1994, Glasserman              Kahl, C., P. Jäckel. 2005. Not-so-complex logarithms in the Heston model.
+2004).                                                                    Wilmott (September) 94–103.
+Giles: Multilevel Monte Carlo Path Simulation
+Operations Research 56(3), pp. 607–617, © 2008 INFORMS                                                                                            617
+
+Kahl, C., P. Jäckel. 2006. Fast strong approximation Monte-Carlo              L’Ecuyer, P. 2004. Quasi-Monte Carlo methods in ﬁnance. R. G. Ingalls,
+    schemes for stochastic volatility models. Quantitative Finance 6(6)            M. D. Rossetti, J. S. Smith, B. A. Peters, eds. Proc. 2004 Winter
+    513–536.                                                                       Simulation Conf., IEEE Press, Washington, D.C., 1645–1655.
+Kahn, H. 1956. Use of different Monte Carlo sampling techniques. H. A.        Liu, J. S. 2001. Monte Carlo Strategies in Scientiﬁc Computing. Springer,
+    Meyer, ed. Sympos. Monte Carlo Methods. Wiley, 146–190.                        New York.
+Kebaier, A. 2005. Statistical Romberg extrapolation: A new variance           Niederreiter, H. 1992. Random Number Generation and Quasi-Monte
+    reduction method and applications to options pricing. Ann. Appl.               Carlo Methods. SIAM, Philadelphia.
+    Probab. 14(4) 2681–2705.                                                  Talay, D., L. Tubaro. 1990. Expansion of the global error for numerical
+Kloeden, P. E., E. Platen. 1992. Numerical Solution of Stochastic Differ-          schemes solving stochastic differential equations. Stochastic Anal.
+    ential Equations. Springer-Verlag, Berlin.                                     Appl. 8 483–509.
+Kuo, F. Y., I. H. Sloan. 2005. Lifting the curse of dimensionality. Notices   Wesseling, P. 1992. An Introduction to Multigrid Methods. John Wiley,
+    of the AMS 52(11) 1320–1328.                                                   Chichester, UK.
+
